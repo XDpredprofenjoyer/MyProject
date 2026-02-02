@@ -87,7 +87,6 @@ class Application(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='Название заявки')
     date = models.DateField(null=True, blank=True, verbose_name='Дата')
     amount = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
-    user = models.CharField(max_length=100, unique=True, verbose_name='Пользователь')
     select_dishes = models.ForeignKey(
     Dish, 
         on_delete=models.SET_NULL, 
@@ -99,14 +98,15 @@ class Application(models.Model):
                     choices=STATUS_CHOICES,
                  verbose_name='Статус',
                   default="NEW")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания', null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления', null=True, blank=True)
 
     user = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
         verbose_name='Автор заказа',
-        related_name='applications'
+        related_name='applications',
+        null=True, blank=True,
     )
 
     class Meta:
@@ -203,7 +203,7 @@ class Profile(models.Model):
                     choices=STATUS_CHOICES,
                  verbose_name='Статус',
                   default="povar")
-    
+    balans = models.FloatField(null=True, blank=True, verbose_name='Баланс денег')
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
