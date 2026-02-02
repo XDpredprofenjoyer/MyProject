@@ -23,7 +23,7 @@ class MenuAdmin(admin.ModelAdmin):
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
     """Админка для заявки"""
-    list_display = ('name', 'date', 'amount', 'select_dishes',)
+    list_display = ('name', 'date', 'amount', 'select_dishes', 'user',)
     search_fields = ('name',)
     list_per_page = 20
 

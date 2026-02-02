@@ -1,4 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
+# Сигнал для автоматического создания профиля при создании пользователя
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='Название категории')
@@ -82,6 +87,7 @@ class Application(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='Название заявки')
     date = models.DateField(null=True, blank=True, verbose_name='Дата')
     amount = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
+    user = models.CharField(max_length=100, unique=True, verbose_name='Пользователь')
     select_dishes = models.ForeignKey(
     Dish, 
         on_delete=models.SET_NULL, 
@@ -93,7 +99,15 @@ class Application(models.Model):
                     choices=STATUS_CHOICES,
                  verbose_name='Статус',
                   default="NEW")
-    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        verbose_name='Автор заказа',
+        related_name='applications'
+    )
 
     class Meta:
         verbose_name = 'Заявка'
@@ -159,3 +173,52 @@ class Menu(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class Profile(models.Model):
+    """Профиль пользователя для хранения дополнительных данных"""
+   
+    STATUS_CHOICES = (
+        ("povar", "Повар"),
+        ("student", "Школьник"),
+        ("parent", "Родитель"),
+        ("admin", "Админ"),
+    )
+   
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+    avatar = models.ImageField(
+        upload_to='avatars/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        verbose_name='Аватар'
+    )
+    class_group = models.CharField(max_length=100, verbose_name='учебный класс')
+    phone = models.CharField(max_length=100, verbose_name='телефон')
+    parent_phone = models.CharField(max_length=100, verbose_name='телефон родителей')
+    status = models.CharField(max_length=9,
+                    choices=STATUS_CHOICES,
+                 verbose_name='Статус',
+                  default="povar")
+    
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+    
+    def __str__(self):
+        return f"Профиль {self.user.username}"
+
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
