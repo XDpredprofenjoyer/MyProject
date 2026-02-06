@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление столовой - Главная страница{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <h1 style="margin: 0;">Меню</h1>
+    {% if user.is_authenticated %}
+        <a href="{% url 'index' %}" class="btn btn-primary">Добавить заказ</a>
+    {% endif %}
+</div>
+
+{% if works %}
+    <div class="grid">
+        {% for work in works %}
+            <div class="card">
+                <a href="{% url 'work_detail' work.author.username work.id %}">
+                    {% if work.image %}
+                        <img src="{{ work.image.url }}" alt="{{ work.title }}" class="card-img">
+                    {% else %}
+                        <div class="card-img" style="background: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                            <span>Нет изображения</span>
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <a href="{% url 'work_detail' work.author.username work.id %}" style="text-decoration: none; color: inherit;">
+                            {{ work.title }}
+                        </a>
+                    </h3>
+                    {% if work.description %}
+                        <p class="card-text">{{ work.description|truncatechars:53 }}</p>
+                    {% endif %}
+                    <div class="card-meta">
+                        <div class="card-author">
+                            <a href="{% url 'user_profile' work.author.username %}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.5rem;">
+                                {% if work.author.profile.avatar %}
+                                    <img src="{{ work.author.profile.avatar.url }}" alt="{{ work.author.username }}" class="avatar-small">
+                                {% else %}
+                                    <div class="avatar-small-placeholder">
+                                        {{ work.author.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <span class="author-name">
+                            @{{ work.author.username }}
+                        </span>
+                            </a>
+                        </div>
+                        <div class="card-date">
+                            <small>{{ work.created_at|date:"d.m.Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="page-link">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">‹</a>
+            {% else %}
+                <span class="page-link disabled">«</span>
+                <span class="page-link disabled">‹</span>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="page-link current">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="page-link">›</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">»</a>
+            {% else %}
+                <span class="page-link disabled">›</span>
+                <span class="page-link disabled">»</span>
+            {% endif %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🎨</div>
+        <h3>Пока нет работ</h3>
+        <p>Будьте первым, кто добавит свою работу!</p>
+        <br>
+        {% if user.is_authenticated %}
+            <a href="{% url 'index' %}" class="btn btn-primary">Добавить работу</a>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

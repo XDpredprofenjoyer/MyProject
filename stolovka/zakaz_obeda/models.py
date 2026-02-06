@@ -18,12 +18,13 @@ class Category(models.Model):
 
 
 class Ingridients(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name='Название ингридиента')
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название ингредиента')
     is_allergen = models.BooleanField()
+    price = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ['name']
     
     def __str__(self):
@@ -77,46 +78,176 @@ class СomplexDish(models.Model):
         return self.name
 
 
-class Application(models.Model):
-    
-    STATUS_CHOICES = (
-        ("NEW", "Новый"),
-        ("DONE", "Оплата проведена"),
-    )
+class Abonement(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название абонемента')
+    price = models.FloatField(null=True, blank=True, verbose_name='Стоимость абонемента')
 
-    name = models.CharField(max_length=100, unique=True, verbose_name='Название заявки')
-    date = models.DateField(null=True, blank=True, verbose_name='Дата')
-    amount = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
-    select_dishes = models.ForeignKey(
-    Dish, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+    dishes_in_abonement = models.ManyToManyField(
+        Dish, 
         blank=True, 
-        verbose_name='Выбор блюд'
-    )
-    status = models.CharField(max_length=9,
-                    choices=STATUS_CHOICES,
-                 verbose_name='Статус',
-                  default="NEW")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания', null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления', null=True, blank=True)
-
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        verbose_name='Автор заказа',
-        related_name='applications',
-        null=True, blank=True,
+        verbose_name='Блюда в абонементе'
     )
 
+    amount_of_dishes = models.FloatField(null=True, blank=True, verbose_name='Количество блюд')
+
+    complex_in_abonement = models.ManyToManyField(
+        СomplexDish, 
+        blank=True, 
+        verbose_name='Комплексы в абонементе'
+    )
+
+    amount_of_complex = models.FloatField(null=True, blank=True, verbose_name='Количество комплексов')
+    
     class Meta:
-        verbose_name = 'Заявка'
-        verbose_name_plural = 'Заявки'
+        verbose_name = 'Абонемент'
+        verbose_name_plural = 'Абонементы'
         ordering = ['name']
     
     def __str__(self):
         return self.name
 
+
+
+class Purchase(models.Model):
+
+    STATUS_POVAR = (
+        ("NEW", "Новый"),
+        ("DONE", "Заказ выдан"),
+    )
+
+    STATUS_OPLATY = (
+        ("NEW", "Новый"),
+        ("IN_PROGRESS", "Оплата проведена"),
+        ("DONE", "Заказ получен"),
+    )
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.RESTRICT, 
+        verbose_name='Кто заказал еду',
+        related_name='purchases',
+        null=True, blank=True,
+    )
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название покупки',null=True, blank=True)
+    dishes_in_purchase = models.ManyToManyField(
+        Dish, 
+        blank=True, 
+        verbose_name='Блюда'
+    )
+
+    complex_in_purchase = models.ManyToManyField(
+        СomplexDish, 
+        blank=True, 
+        verbose_name='Комплексы'
+    )
+
+
+    price = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
+
+    status_povar = models.CharField(max_length=20,
+                    choices=STATUS_POVAR,
+                 verbose_name='Статус от повара',
+                  default="NEW")
+    
+    status_oplaty = models.CharField(max_length=20,
+                    choices=STATUS_OPLATY,
+                 verbose_name='Статус оплаты',
+                  default="NEW")
+    
+    class Meta:
+        verbose_name = 'Покупка еды учеником'
+        verbose_name_plural = 'Покупки еды учеником'
+        ordering = ['name']
+    
+    def __str__(self):
+         return f"{self.id} - {self.user}"
+
+
+class Profile(models.Model):
+    """Профиль пользователя для хранения дополнительных данных"""
+   
+    STATUS_CHOICES = (
+        ("povar", "Повар"),
+        ("zakup", "Закупщик"),
+        ("student", "Школьник"),
+        ("parent", "Родитель"),
+        ("admin", "Админ"),
+    )
+   
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+    avatar = models.ImageField(
+        upload_to='avatars/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        verbose_name='Аватар'
+    )
+    class_group = models.CharField(null=True, blank=True, max_length=100, verbose_name='учебный класс')
+    phone = models.CharField(null=True, blank=True, max_length=100, verbose_name='телефон')
+    parent_phone = models.CharField(null=True, blank=True, max_length=100, verbose_name='телефон родителей')
+    status = models.CharField(max_length=9,
+                    choices=STATUS_CHOICES,
+                 verbose_name='Статус',
+                  default="student")
+    balans = models.FloatField(null=True, blank=True, verbose_name='Баланс денег')
+    balans_obedov = models.IntegerField(null=True, blank=True, verbose_name='Баланс обедов')
+    balans_dishes = models.IntegerField(null=True, blank=True, verbose_name='Баланс блюд')
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+    
+    def __str__(self):
+        return f"Профиль {self.user.username}"
+
+
+class Application_student(models.Model):
+    STATUS_CHOICES = (
+        ("NEW", "Новый"),
+        ("DONE", "Баланс пополнен"),
+    )
+    
+    date = models.DateTimeField(null=True, blank=True, verbose_name='Дата заявки учащегося')
+    amount = models.FloatField(null=True, blank=True, verbose_name='Сумма пополнения')
+
+    abonement = models.ForeignKey(
+        Abonement, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        verbose_name='Абонемент'
+    )
+
+    user = models.ForeignKey(
+        Profile, 
+        on_delete=models.RESTRICT, 
+        verbose_name='Кому пополняем баланс',
+        related_name='applications_add_balans',
+        null=True, blank=True,
+    )
+    admin = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        verbose_name='Кто обрабатывает заявку',
+        null=True, blank=True,
+    )
+
+    status = models.CharField(max_length=9,
+                    choices=STATUS_CHOICES,
+                 verbose_name='Статус',
+                  default="NEW")
+    name = models.CharField(max_length=100, null=True, blank=True, unique=True, verbose_name='Название заявки учащегося')
+    
+
+    class Meta:
+        verbose_name = 'Пополнение баланса'
+        verbose_name_plural = 'Пополнения баланса'
+        ordering = ['name']
+    
+    def __str__(self):
+         return f"{self.id} - {self.name}"
 
 
 class Feedback_category(models.Model):
@@ -175,41 +306,55 @@ class Menu(models.Model):
         return self.name
 
 
-class Profile(models.Model):
-    """Профиль пользователя для хранения дополнительных данных"""
-   
+
+
+
+class Application(models.Model):
+    
     STATUS_CHOICES = (
-        ("povar", "Повар"),
-        ("student", "Школьник"),
-        ("parent", "Родитель"),
-        ("admin", "Админ"),
+        ("NEW", "Новый"),
+        ("COST", "Расчет стоимости"),
+        ("PAY", "Оплечен"),
+        ("CONFIRMED", "Подтвержден"),
+        ("DONE", "Получен"),
     )
-   
-    user = models.OneToOneField(
-        User, 
-        on_delete=models.CASCADE,
-        related_name='profile'
+
+    name = models.CharField(max_length=100, unique=True, verbose_name='Название заявки')
+    date = models.DateField(null=True, blank=True, verbose_name='На какую дату нужен заказ')
+    amount = models.FloatField(null=True, blank=True, verbose_name='Стоимость')
+    menu = models.ManyToManyField(Menu, 
+        blank=True, null=True,
+        verbose_name='Комплекс в меню'
     )
-    avatar = models.ImageField(
-        upload_to='avatars/%Y/%m/%d/',
-        blank=True,
-        null=True,
-        verbose_name='Аватар'
+    ingridients = models.ManyToManyField(Ingridients, 
+        blank=True, null=True,
+        verbose_name='Ингредиент'
     )
-    class_group = models.CharField(max_length=100, verbose_name='учебный класс')
-    phone = models.CharField(max_length=100, verbose_name='телефон')
-    parent_phone = models.CharField(max_length=100, verbose_name='телефон родителей')
+
     status = models.CharField(max_length=9,
                     choices=STATUS_CHOICES,
                  verbose_name='Статус',
-                  default="povar")
-    balans = models.FloatField(null=True, blank=True, verbose_name='Баланс денег')
+                  default="NEW")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания', null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления', null=True, blank=True)
+
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        verbose_name='Автор заказа',
+        related_name='applications',
+        null=True, blank=True,
+    )
+
     class Meta:
-        verbose_name = 'Профиль'
-        verbose_name_plural = 'Профили'
+        verbose_name = 'Заявка на закупку повара'
+        verbose_name_plural = 'Заявки на закупку повара'
+        ordering = ['name']
     
     def __str__(self):
-        return f"Профиль {self.user.username}"
+        return self.name
+
 
 
 
