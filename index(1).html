@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация | Платия</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #ffffff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .role-btns .btn {
+            min-width: 110px;
+        }
+        .toggle-link {
+            cursor: pointer;
+        }
+        .tile-card {
+            border-radius: 0.75rem;
+        }
+        .menu-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .qty-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .qty-display {
+            min-width: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Блок регистрации / входа -->
+    <div id="authSection" class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card p-4 p-md-5 bg-white">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-1">Регистрация</h2>
+                        <p class="text-muted mb-0">Выберите роль и заполните данные</p>
+                    </div>
+
+                    <!-- Кнопки выбора роли -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Я:</label>
+                        <div class="d-flex gap-2 flex-wrap role-btns">
+                            <button type="button" class="btn btn-outline-primary flex-fill active" data-role="Повар">Повар</button>
+                            <button type="button" class="btn btn-outline-primary flex-fill" data-role="Студент">Студент</button>
+                            <button type="button" class="btn btn-outline-primary flex-fill" data-role="Админ">Админ</button>
+                        </div>
+                        <input type="hidden" id="roleInput" value="Повар">
+                    </div>
+
+                    <!-- Форма регистрации -->
+                    <form id="registerForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="registerName" class="form-label">Имя и фамилия</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="Иван Иванов" required>
+                            <div class="invalid-feedback">Введите имя и фамилию.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerLogin" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="registerLogin" placeholder="login123" required>
+                            <div class="invalid-feedback">Введите логин.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="registerPassword" placeholder="••••••••" required>
+                            <div class="invalid-feedback">Введите пароль.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                    </form>
+
+                    <!-- Форма входа -->
+                    <form id="loginForm" class="needs-validation d-none mt-2" novalidate>
+                        <div class="mb-3">
+                            <label for="loginName" class="form-label">Имя и фамилия</label>
+                            <input type="text" class="form-control" id="loginName" placeholder="Иван Иванов" required>
+                            <div class="invalid-feedback">Введите имя и фамилию.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginLogin" class="form-label">Логин</label>
+                            <input type="text" class="form-control" id="loginLogin" placeholder="login123" required>
+                            <div class="invalid-feedback">Введите логин.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+                            <div class="invalid-feedback">Введите пароль.</div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Войти</button>
+                    </form>
+
+                    <!-- Переключение между регистрацией и входом -->
+                    <div class="text-center mt-4">
+                        <span id="toLogin" class="toggle-link text-primary fw-semibold">Войти в аккаунт</span>
+                        <span id="toRegister" class="toggle-link text-primary fw-semibold d-none">Создать новый аккаунт</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кабинет ученика -->
+    <div id="studentSection" class="container py-4 d-none">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">Кабинет ученика</h2>
+                <p class="text-muted mb-0">Здесь можно выбрать дату и заказать завтрак или обед.</p>
+            </div>
+        </div>
+
+        <!-- Плашки -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card tile-card text-center p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Дата</h5>
+                    <input type="date" id="orderDate" class="form-control" />
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card tile-card text-center p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Меню</h5>
+                    <p class="text-muted mb-0">Выберите блюда в разделе ниже.</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card tile-card text-center p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Корзина</h5>
+                    <p class="mb-0"><span id="cartItemsCount">0</span> блюд</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Меню -->
+        <div class="row mb-4">
+            <div class="col-lg-7">
+                <div class="card tile-card p-3">
+                    <h4 class="fw-semibold mb-2">Меню на сегодня</h4>
+                    <div class="mb-2">
+                        <span class="fw-semibold me-2">Что вы хотите заказать?</span>
+                        <div class="btn-group" role="group" aria-label="Тип приёма пищи">
+                            <button type="button" class="btn btn-outline-primary active" data-meal-type="breakfast">Завтрак</button>
+                            <button type="button" class="btn btn-outline-primary" data-meal-type="lunch">Обед</button>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-2 mb-1">Выберите блюдо:</p>
+                    <ul class="list-group" id="menuList"></ul>
+                </div>
+            </div>
+
+            <!-- Корзина -->
+            <div class="col-lg-5 mt-3 mt-lg-0">
+                <div class="card tile-card p-3 mb-3">
+                    <h5 class="fw-semibold mb-2">Корзина</h5>
+                    <div id="cartContent" class="small text-muted">Вы ещё не выбрали блюда.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижние кнопки -->
+        <div class="row mt-3">
+            <div class="col-12 d-flex flex-wrap gap-2">
+                <button id="backToRegister" type="button" class="btn btn-outline-secondary">
+                    Вернуться на страницу регистрации
+                </button>
+                <button id="setAllergies" type="button" class="btn btn-outline-warning">
+                    Указать аллергии
+                </button>
+                <button id="studentProfileBtn" type="button" class="btn btn-outline-info">
+                    Профиль
+                </button>
+                <button id="payOrder" type="button" class="btn btn-success ms-auto">
+                    Оплатить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кабинет повара -->
+    <div id="cookSection" class="container py-4 d-none">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">Кабинет повара</h2>
+                <p class="text-muted mb-0">Здесь можно увидеть учёт блюд, остатки и заявки на выбранную дату.</p>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Учёт</h5>
+                    <div id="cookAccounting" class="small text-muted">
+                        Пока нет заказанных блюд.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Остаток</h5>
+                    <div id="cookLeftovers" class="small text-muted">
+                        Остатки появятся после того, как появятся заказы.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Заявки</h5>
+                    <div class="mb-2">
+                        <label for="cookDateFilter" class="form-label mb-1">Дата для просмотра заявок</label>
+                        <input type="date" id="cookDateFilter" class="form-control form-control-sm" />
+                    </div>
+                    <div id="cookRequests" class="small text-muted">
+                        Выберите дату, чтобы увидеть количество заказов.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12 d-flex flex-wrap gap-2">
+                <button id="cookBackToRegister" type="button" class="btn btn-outline-secondary">
+                    Вернуться на страницу регистрации
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кабинет администратора -->
+    <div id="adminSection" class="container py-4 d-none">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">Кабинет администратора</h2>
+                <p class="text-muted mb-2">Здесь можно посмотреть посещаемость, заявки и отчёт по заказам.</p>
+                <div class="row g-2 align-items-end">
+                    <div class="col-sm-4">
+                        <label for="adminDateFilter" class="form-label mb-1">Дата</label>
+                        <input type="date" id="adminDateFilter" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Посещаемость</h5>
+                    <div id="adminAttendance" class="small text-muted">
+                        Выберите дату, чтобы увидеть, кто пришёл в столовую.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Заявки</h5>
+                    <div id="adminRequests" class="small text-muted">
+                        Заявки появятся после оформления заказов.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card tile-card p-3 h-100">
+                    <h5 class="fw-semibold mb-2">Отчёт</h5>
+                    <div id="adminReport" class="small text-muted">
+                        Отчёт появится после оформления и выдачи заказов.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12 d-flex flex-wrap gap-2">
+                <button id="adminBackToRegister" type="button" class="btn btn-outline-secondary">
+                    Вернуться на страницу регистрации
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Bundle с Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // Переключение ролей
+        const roleButtons = document.querySelectorAll('.role-btns .btn');
+        const roleInput = document.getElementById('roleInput');
+
+        roleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                roleButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                roleInput.value = btn.getAttribute('data-role');
+            });
+        });
+
+        // Блоки интерфейса
+        const authSection = document.getElementById('authSection');
+        const studentSection = document.getElementById('studentSection');
+        const cookSection = document.getElementById('cookSection');
+        const adminSection = document.getElementById('adminSection');
+
+        // Текущий пользователь (для профиля/отчётов)
+        let currentUserName = '';
+
+        // Формы регистрации / входа
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const toLogin = document.getElementById('toLogin');
+        const toRegister = document.getElementById('toRegister');
+
+        toLogin.addEventListener('click', () => {
+            registerForm.classList.add('d-none');
+            loginForm.classList.remove('d-none');
+            toLogin.classList.add('d-none');
+            toRegister.classList.remove('d-none');
+        });
+
+        toRegister.addEventListener('click', () => {
+            loginForm.classList.add('d-none');
+            registerForm.classList.remove('d-none');
+            toRegister.classList.add('d-none');
+            toLogin.classList.remove('d-none');
+        });
+
+        // Управление меню ученика
+        const cartItemsCountSpan = document.getElementById('cartItemsCount');
+        const cartContent = document.getElementById('cartContent');
+        const orderDateInput = document.getElementById('orderDate');
+        const menuList = document.getElementById('menuList');
+        const mealTypeButtons = document.querySelectorAll('[data-meal-type]');
+
+        // Каталог блюд: завтрак и обед (перевод на русский)
+        const dishCatalog = {
+            breakfast: [
+                // Напитки
+                { id: 'br_tea', name: 'Чай', category: 'Напитки' },
+                { id: 'br_coffee', name: 'Кофе', category: 'Напитки' },
+                { id: 'br_cocoa', name: 'Какао', category: 'Напитки' },
+                // Десерты
+                { id: 'br_yogurt', name: 'Йогурт', category: 'Десерты' },
+                { id: 'br_cookie', name: 'Печенье', category: 'Десерты' },
+                { id: 'br_muffin', name: 'Маффин', category: 'Десерты' },
+                { id: 'br_brownie', name: 'Брауни', category: 'Десерты' },
+                { id: 'br_cinnamon_bun', name: 'Булочка с корицей', category: 'Десерты' },
+                // Основные блюда
+                { id: 'br_buckwheat', name: 'Гречка', category: 'Основные блюда' },
+                { id: 'br_boiled_eggs', name: 'Варёные яйца', category: 'Основные блюда' },
+                { id: 'br_pasta', name: 'Макароны', category: 'Основные блюда' },
+                { id: 'br_oats_milk', name: 'Овсянка на молоке', category: 'Основные блюда' },
+                { id: 'br_white_rice', name: 'Белый рис', category: 'Основные блюда' },
+                { id: 'br_cereal_milk', name: 'Сухие хлопья с молоком', category: 'Основные блюда' },
+                // Добавки к основным блюдам
+                { id: 'br_sausages', name: 'Сосиски', category: 'Добавки к основным блюдам' },
+                { id: 'br_nuggets', name: 'Наггетсы', category: 'Добавки к основным блюдам' },
+                { id: 'br_toast', name: 'Тост', category: 'Добавки к основным блюдам' },
+                { id: 'br_fried_eggs', name: 'Яичница', category: 'Добавки к основным блюдам' },
+                { id: 'br_beef_steak', name: 'Стейк из говядины', category: 'Добавки к основным блюдам' },
+                { id: 'br_salad', name: 'Салат', category: 'Добавки к основным блюдам' }
+            ],
+            lunch: [
+                // Напитки
+                { id: 'ln_stewed_fruit', name: 'Компот', category: 'Напитки' },
+                { id: 'ln_tea', name: 'Чай', category: 'Напитки' },
+                // Десерты
+                { id: 'ln_yogurt', name: 'Йогурт', category: 'Десерты' },
+                { id: 'ln_cookie', name: 'Печенье', category: 'Десерты' },
+                { id: 'ln_muffin', name: 'Маффин', category: 'Десерты' },
+                { id: 'ln_brownie', name: 'Брауни', category: 'Десерты' },
+                { id: 'ln_cinnamon_bun', name: 'Булочка с корицей', category: 'Десерты' },
+                // Супы
+                { id: 'ln_potato_soup', name: 'Картофельный суп', category: 'Супы' },
+                { id: 'ln_vegetable_soup', name: 'Овощной суп', category: 'Супы' },
+                { id: 'ln_rassolnik', name: 'Рассольник', category: 'Супы' },
+                { id: 'ln_borsch', name: 'Борщ', category: 'Супы' },
+                { id: 'ln_noodle_soup', name: 'Суп с лапшой', category: 'Супы' },
+                // Мясные блюда
+                { id: 'ln_chicken', name: 'Курица', category: 'Мясные блюда' },
+                { id: 'ln_beef', name: 'Говядина', category: 'Мясные блюда' },
+                { id: 'ln_chicken_meatballs', name: 'Куриные фрикадельки', category: 'Мясные блюда' },
+                { id: 'ln_beef_schnitzel', name: 'Говяжий шницель', category: 'Мясные блюда' },
+                { id: 'ln_turkey_fillet', name: 'Филе индейки', category: 'Мясные блюда' },
+                { id: 'ln_meatballs', name: 'Тефтели', category: 'Мясные блюда' },
+                // Каши и гарниры
+                { id: 'ln_bulgur', name: 'Булгур', category: 'Каши и гарниры' },
+                { id: 'ln_mashed_potato', name: 'Картофельное пюре', category: 'Каши и гарниры' },
+                { id: 'ln_wheat_porridge', name: 'Пшеничная каша', category: 'Каши и гарниры' },
+                { id: 'ln_barley_porridge', name: 'Перловая каша', category: 'Каши и гарниры' },
+                { id: 'ln_baked_potato', name: 'Запечённый картофель', category: 'Каши и гарниры' },
+                { id: 'ln_millet_porridge', name: 'Пшённая каша', category: 'Каши и гарниры' }
+            ]
+        };
+
+        const dishNames = {};
+        Object.values(dishCatalog).flat().forEach(dish => {
+            dishNames[dish.id] = dish.name;
+        });
+
+        const quantities = {};
+        Object.values(dishCatalog).flat().forEach(dish => {
+            quantities[dish.id] = 0;
+        });
+
+        let currentMealType = 'breakfast';
+
+        function renderMenu() {
+            menuList.innerHTML = '';
+            const dishes = dishCatalog[currentMealType];
+            dishes.forEach(dish => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `
+                    <div class="menu-item-row">
+                        <div>
+                            <div class="fw-semibold">${dish.name}</div>
+                            <small class="text-muted">${dish.category}</small>
+                        </div>
+                        <div class="qty-controls" data-dish="${dish.id}">
+                            <button type="button" class="btn btn-sm btn-outline-secondary qty-minus">-</button>
+                            <span class="qty-display" data-qty>${quantities[dish.id]}</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary qty-plus">+</button>
+                        </div>
+                    </div>
+                `;
+                menuList.appendChild(li);
+            });
+
+            // Обработчики + и -
+            menuList.querySelectorAll('.qty-controls').forEach(group => {
+                const dishKey = group.getAttribute('data-dish');
+                const minusBtn = group.querySelector('.qty-minus');
+                const plusBtn = group.querySelector('.qty-plus');
+                const qtySpan = group.querySelector('[data-qty]');
+
+                plusBtn.addEventListener('click', () => {
+                    quantities[dishKey]++;
+                    qtySpan.textContent = quantities[dishKey];
+                    updateCartView();
+                });
+
+                minusBtn.addEventListener('click', () => {
+                    if (quantities[dishKey] > 0) {
+                        quantities[dishKey]--;
+                        qtySpan.textContent = quantities[dishKey];
+                        updateCartView();
+                    }
+                });
+            });
+        }
+
+        mealTypeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                mealTypeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMealType = btn.getAttribute('data-meal-type');
+                renderMenu();
+                updateCartView();
+            });
+        });
+
+        function updateCartView() {
+            const entries = Object.entries(quantities).filter(([, qty]) => qty > 0);
+            const total = entries.reduce((sum, [, qty]) => sum + qty, 0);
+            cartItemsCountSpan.textContent = total;
+
+            if (entries.length === 0) {
+                cartContent.textContent = 'Вы ещё не выбрали блюда.';
+                return;
+            }
+
+            const list = document.createElement('ul');
+            list.className = 'list-unstyled mb-0';
+            entries.forEach(([key, qty]) => {
+                const li = document.createElement('li');
+                li.textContent = (dishNames[key] || key) + ' — ' + qty + ' шт.';
+                list.appendChild(li);
+            });
+            cartContent.innerHTML = '';
+            cartContent.appendChild(list);
+        }
+
+        // Цены блюд (для отчётов администратора)
+        const dishPrices = {};
+        Object.values(dishCatalog).flat().forEach(dish => {
+            dishPrices[dish.id] = 100; // демонстрационная цена, 100 денежных единиц за порцию
+        });
+
+        // Хранилище заказов для повара/админа
+        const ordersStore = [];
+
+        // Элементы кабинета повара
+        const cookAccountingEl = document.getElementById('cookAccounting');
+        const cookLeftoversEl = document.getElementById('cookLeftovers');
+        const cookDateFilter = document.getElementById('cookDateFilter');
+        const cookRequestsEl = document.getElementById('cookRequests');
+
+        // Элементы кабинета администратора
+        const adminDateFilter = document.getElementById('adminDateFilter');
+        const adminAttendanceEl = document.getElementById('adminAttendance');
+        const adminRequestsEl = document.getElementById('adminRequests');
+        const adminReportEl = document.getElementById('adminReport');
+
+        function getTotalByDish() {
+            const totals = {};
+            Object.keys(dishNames).forEach(id => totals[id] = 0);
+            ordersStore.forEach(order => {
+                Object.entries(order.items).forEach(([id, qty]) => {
+                    totals[id] += qty;
+                });
+            });
+            return totals;
+        }
+
+        function renderCookAccounting() {
+            if (ordersStore.length === 0) {
+                cookAccountingEl.textContent = 'Пока нет заказанных блюд.';
+                return;
+            }
+            const totals = getTotalByDish();
+            const entries = Object.entries(totals).filter(([, qty]) => qty > 0);
+            if (entries.length === 0) {
+                cookAccountingEl.textContent = 'Пока нет заказанных блюд.';
+                return;
+            }
+            const table = document.createElement('table');
+            table.className = 'table table-sm mb-0';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Блюдо</th>
+                        <th class="text-end">Заказано порций</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+            entries.forEach(([id, qty]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dishNames[id] || id}</td>
+                    <td class="text-end">${qty}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            cookAccountingEl.innerHTML = '';
+            cookAccountingEl.appendChild(table);
+        }
+
+        function renderCookLeftovers() {
+            if (ordersStore.length === 0) {
+                cookLeftoversEl.textContent = 'Остатки появятся после того, как появятся заказы.';
+                return;
+            }
+            const totals = getTotalByDish();
+            const PLAN_PER_DISH = 50; // демонстрационное значение
+            const entries = Object.entries(totals).filter(([, qty]) => qty > 0);
+            if (entries.length === 0) {
+                cookLeftoversEl.textContent = 'Остатки появятся после того, как появятся заказы.';
+                return;
+            }
+            const table = document.createElement('table');
+            table.className = 'table table-sm mb-0';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Блюдо</th>
+                        <th class="text-end">Приготовлено (из 50)</th>
+                        <th class="text-end">Заказано</th>
+                        <th class="text-end">Остаток</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+            entries.forEach(([id, qty]) => {
+                const left = Math.max(PLAN_PER_DISH - qty, 0);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dishNames[id] || id}</td>
+                    <td class="text-end">${PLAN_PER_DISH}</td>
+                    <td class="text-end">${qty}</td>
+                    <td class="text-end">${left}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            cookLeftoversEl.innerHTML = '';
+            cookLeftoversEl.appendChild(table);
+        }
+
+        function renderCookRequests() {
+            const date = cookDateFilter.value;
+            if (!date) {
+                cookRequestsEl.textContent = 'Выберите дату, чтобы увидеть количество заказов.';
+                return;
+            }
+            const ordersForDate = ordersStore.filter(order => order.date === date);
+            if (ordersForDate.length === 0) {
+                cookRequestsEl.textContent = 'На выбранную дату заявок нет.';
+                return;
+            }
+            const totals = {};
+            ordersForDate.forEach(order => {
+                Object.entries(order.items).forEach(([id, qty]) => {
+                    totals[id] = (totals[id] || 0) + qty;
+                });
+            });
+            const table = document.createElement('table');
+            table.className = 'table table-sm mb-1';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Блюдо</th>
+                        <th class="text-end">Порций</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+            Object.entries(totals).forEach(([id, qty]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dishNames[id] || id}</td>
+                    <td class="text-end">${qty}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            const info = document.createElement('div');
+            info.className = 'mt-1';
+            info.textContent = 'Всего заявок: ' + ordersForDate.length;
+
+            cookRequestsEl.innerHTML = '';
+            cookRequestsEl.appendChild(table);
+            cookRequestsEl.appendChild(info);
+        }
+
+        cookDateFilter.addEventListener('change', renderCookRequests);
+
+        // ----- Кабинет администратора -----
+
+        function renderAdminAttendance() {
+            const date = adminDateFilter.value;
+            if (!date) {
+                adminAttendanceEl.textContent = 'Выберите дату, чтобы увидеть, кто пришёл в столовую.';
+                return;
+            }
+            const ordersForDate = ordersStore.filter(order => order.date === date && order.pickedUp);
+            if (ordersForDate.length === 0) {
+                adminAttendanceEl.textContent = 'На выбранную дату никто не отметился как пришедший.';
+                return;
+            }
+            const list = document.createElement('ul');
+            list.className = 'list-unstyled mb-0';
+            ordersForDate.forEach(order => {
+                const li = document.createElement('li');
+                li.textContent = (order.studentName || 'Неизвестный ученик') + ' — ' + (order.mealType === 'breakfast' ? 'завтрак' : 'обед');
+                list.appendChild(li);
+            });
+            adminAttendanceEl.innerHTML = '';
+            adminAttendanceEl.appendChild(list);
+        }
+
+        function renderAdminRequests() {
+            const date = adminDateFilter.value;
+            const ordersForDate = date ? ordersStore.filter(order => order.date === date) : ordersStore.slice();
+            if (ordersForDate.length === 0) {
+                adminRequestsEl.textContent = 'Заявок пока нет.';
+                return;
+            }
+            const table = document.createElement('table');
+            table.className = 'table table-sm mb-0';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Ученик</th>
+                        <th>Дата</th>
+                        <th class="text-end">Сумма заказа</th>
+                        <th>Аллергии</th>
+                        <th>Одобрение</th>
+                        <th>Посещение</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+            const tbody = table.querySelector('tbody');
+            ordersForDate.forEach((order, index) => {
+                const rowIndex = index;
+                const tr = document.createElement('tr');
+                const allergiesText = order.allergyText || 'не указаны';
+                const hasAllergies = allergiesText.trim() !== '' && allergiesText.trim().toLowerCase() !== 'не указаны';
+                tr.innerHTML = `
+                    <td>${order.studentName || 'Неизвестный ученик'}</td>
+                    <td>${order.date || '-'}</td>
+                    <td class="text-end">${order.totalPrice || 0}</td>
+                    <td>${hasAllergies ? 'есть (' + allergiesText + ')' : 'нет'}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm ${order.approved ? 'btn-success' : 'btn-outline-success'} admin-approve-btn" data-order-index="${rowIndex}">
+                            ${order.approved ? 'Одобрено' : 'Одобрить'}
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm ${order.pickedUp ? 'btn-primary' : 'btn-outline-primary'} admin-attend-btn" data-order-index="${rowIndex}">
+                            ${order.pickedUp ? 'Пришёл' : 'Отметить приход'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            adminRequestsEl.innerHTML = '';
+            adminRequestsEl.appendChild(table);
+
+            // Обработчики кнопок "Одобрить" и "Отметить приход"
+            adminRequestsEl.querySelectorAll('.admin-approve-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.getAttribute('data-order-index'), 10);
+                    const order = ordersForDate[idx];
+                    if (!order) return;
+                    order.approved = !order.approved;
+                    renderAdminRequests();
+                    renderAdminReport();
+                });
+            });
+
+            adminRequestsEl.querySelectorAll('.admin-attend-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.getAttribute('data-order-index'), 10);
+                    const order = ordersForDate[idx];
+                    if (!order) return;
+                    order.pickedUp = !order.pickedUp;
+                    renderAdminAttendance();
+                    renderAdminReport();
+                    renderAdminRequests();
+                });
+            });
+        }
+
+        function renderAdminReport() {
+            const date = adminDateFilter.value;
+            const ordersForDate = date ? ordersStore.filter(order => order.date === date) : ordersStore.slice();
+            if (ordersForDate.length === 0) {
+                adminReportEl.textContent = 'Отчёт появится после оформления и выдачи заказов.';
+                return;
+            }
+            let totalRevenue = 0;
+            let totalCost = 0;
+            let pickedUpCount = 0;
+
+            ordersForDate.forEach(order => {
+                const price = order.totalPrice || 0;
+                if (order.pickedUp) {
+                    pickedUpCount += 1;
+                    totalRevenue += price;
+                    totalCost += price * 0.7; // условные затраты 70% от цены
+                }
+            });
+
+            adminReportEl.innerHTML = `
+                <p class="mb-1">Забранные заказы: <strong>${pickedUpCount}</strong></p>
+                <p class="mb-1">Сумма затрат (примерно): <strong>${totalCost.toFixed(2)}</strong></p>
+                <p class="mb-0">Сумма полученных денег: <strong>${totalRevenue.toFixed(2)}</strong></p>
+            `;
+        }
+
+        adminDateFilter.addEventListener('change', () => {
+            renderAdminAttendance();
+            renderAdminRequests();
+            renderAdminReport();
+        });
+
+        // Инициализация меню при загрузке
+        renderMenu();
+        updateCartView();
+
+        // Кнопки внизу кабинетов
+        const backToRegisterBtn = document.getElementById('backToRegister');
+        const setAllergiesBtn = document.getElementById('setAllergies');
+        const studentProfileBtn = document.getElementById('studentProfileBtn');
+        const payOrderBtn = document.getElementById('payOrder');
+        const cookBackToRegisterBtn = document.getElementById('cookBackToRegister');
+        const adminBackToRegisterBtn = document.getElementById('adminBackToRegister');
+
+        backToRegisterBtn.addEventListener('click', () => {
+            studentSection.classList.add('d-none');
+            authSection.classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        setAllergiesBtn.addEventListener('click', () => {
+            const current = localStorage.getItem('studentAllergies') || '';
+            const value = prompt('Укажите ваши аллергии (через запятую):', current);
+            if (value !== null) {
+                localStorage.setItem('studentAllergies', value);
+                alert('Аллергии сохранены только в этом браузере.');
+            }
+        });
+
+        cookBackToRegisterBtn.addEventListener('click', () => {
+            cookSection.classList.add('d-none');
+            authSection.classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        adminBackToRegisterBtn.addEventListener('click', () => {
+            adminSection.classList.add('d-none');
+            authSection.classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        studentProfileBtn.addEventListener('click', () => {
+            const allergies = localStorage.getItem('studentAllergies') || 'не указаны';
+            const userOrders = ordersStore.filter(o => o.studentName === currentUserName);
+            let msg = 'Профиль ученика: ' + (currentUserName || 'неизвестно') + '\n';
+            msg += 'Аллергии: ' + allergies + '\n';
+            if (userOrders.length === 0) {
+                msg += 'Заказы: пока нет оформленных заказов.';
+            } else {
+                msg += 'Количество оформленных заказов: ' + userOrders.length + '.';
+            }
+            alert(msg);
+        });
+
+        payOrderBtn.addEventListener('click', () => {
+            const entries = Object.entries(quantities).filter(([, qty]) => qty > 0);
+            if (entries.length === 0) {
+                alert('Сначала выберите хотя бы одно блюдо.');
+                return;
+            }
+            const dateValue = orderDateInput.value;
+            const displayDate = dateValue || 'без указания даты';
+
+            // Сохраняем заказ для повара
+            const items = {};
+            entries.forEach(([key, qty]) => {
+                items[key] = qty;
+            });
+
+            let totalPrice = 0;
+            entries.forEach(([key, qty]) => {
+                const price = dishPrices[key] || 100;
+                totalPrice += price * qty;
+            });
+
+            const allergyText = localStorage.getItem('studentAllergies') || '';
+
+            ordersStore.push({
+                date: dateValue || '',
+                mealType: currentMealType,
+                items,
+                totalPrice,
+                allergyText,
+                approved: false,
+                pickedUp: false,
+                studentName: currentUserName
+            });
+
+            // Обновляем данные в кабинете повара
+            renderCookAccounting();
+            renderCookLeftovers();
+            renderCookRequests();
+
+            // Сброс корзины
+            Object.keys(quantities).forEach(key => quantities[key] = 0);
+            document.querySelectorAll('[data-qty]').forEach(span => span.textContent = '0');
+            updateCartView();
+
+            alert('Оплата прошла успешно (демонстрация). Заказ на ' + displayDate + ' сохранён для повара.');
+        });
+
+        // Простая Bootstrap-валидация
+        (function () {
+            'use strict';
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            event.preventDefault();
+
+                            const currentRole = roleInput.value;
+                            if (form.id === 'registerForm') {
+                                // Запоминаем имя пользователя
+                                const nameInput = document.getElementById('registerName');
+                                currentUserName = (nameInput?.value || '').trim();
+
+                                if (currentRole === 'Студент') {
+                                    // Показать кабинет ученика после регистрации
+                                    authSection.classList.add('d-none');
+                                    cookSection.classList.add('d-none');
+                                    adminSection.classList.add('d-none');
+                                    studentSection.classList.remove('d-none');
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (currentRole === 'Повар') {
+                                    // Показать кабинет повара после регистрации
+                                    authSection.classList.add('d-none');
+                                    studentSection.classList.add('d-none');
+                                    adminSection.classList.add('d-none');
+                                    cookSection.classList.remove('d-none');
+                                    renderCookAccounting();
+                                    renderCookLeftovers();
+                                    renderCookRequests();
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (currentRole === 'Админ') {
+                                    // Показать кабинет администратора после регистрации
+                                    authSection.classList.add('d-none');
+                                    studentSection.classList.add('d-none');
+                                    cookSection.classList.add('d-none');
+                                    adminSection.classList.remove('d-none');
+                                    renderAdminAttendance();
+                                    renderAdminRequests();
+                                    renderAdminReport();
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else {
+                                    alert('Кабинет для выбранной роли пока не реализован.');
+                                }
+                            } else if (form.id === 'loginForm') {
+                                // Вход в аккаунт: впускаем на те же страницы, что и при регистрации
+                                const nameInput = document.getElementById('loginName');
+                                currentUserName = (nameInput?.value || '').trim();
+
+                                if (currentRole === 'Студент') {
+                                    authSection.classList.add('d-none');
+                                    cookSection.classList.add('d-none');
+                                    adminSection.classList.add('d-none');
+                                    studentSection.classList.remove('d-none');
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (currentRole === 'Повар') {
+                                    authSection.classList.add('d-none');
+                                    studentSection.classList.add('d-none');
+                                    adminSection.classList.add('d-none');
+                                    cookSection.classList.remove('d-none');
+                                    renderCookAccounting();
+                                    renderCookLeftovers();
+                                    renderCookRequests();
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else if (currentRole === 'Админ') {
+                                    authSection.classList.add('d-none');
+                                    studentSection.classList.add('d-none');
+                                    cookSection.classList.add('d-none');
+                                    adminSection.classList.remove('d-none');
+                                    renderAdminAttendance();
+                                    renderAdminRequests();
+                                    renderAdminReport();
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else {
+                                    alert('Кабинет для выбранной роли пока не реализован.');
+                                }
+                            } else {
+                                alert('Данные формы только демонстрационные.\nПодключите сервер, чтобы сохранять пользователей.');
+                            }
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+        })();
+    </script>
+</html>
